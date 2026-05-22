@@ -116,7 +116,7 @@ func main() {
 	for opts.Scan() {
 		opt, err := opts.Option()
 		if err != nil {
-			errExit(err.Error())
+			errExit("%s", err)
 		}
 
 		switch opt.Opt {
@@ -218,7 +218,7 @@ func main() {
 		return f.Format(path, results)
 	}
 	if err := grep.Grep(portsRoot, categories, rxs, ored, gfn, maxJobs); err != nil {
-		errExit(err.Error())
+		errExit("%s", err)
 	}
 }
 
