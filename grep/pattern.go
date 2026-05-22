@@ -17,7 +17,7 @@ func (r *Regexp) Match(text []byte) (*Result, error) {
 	if smi == nil {
 		return nil, nil
 	}
-	if len(smi) <= r.rsi {
+	if len(smi) < 2*(r.rsi+1) {
 		return nil, fmt.Errorf("unexpected number of subexpressions %d in %v", len(smi), r)
 	}
 	res := &Result{
