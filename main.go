@@ -72,6 +72,7 @@ const (
 func showUsage() {
 	err := usageTmpl.Execute(os.Stdout, map[string]any{
 		"progname":  progname,
+		"portsRoot": portsRoot,
 		"colorMode": colorMode,
 		"colors":    colors,
 		"maxJobs":   maxJobs,
