@@ -67,7 +67,7 @@ type Formatter interface {
 }
 
 type textFormatter struct {
-	mu sync.Mutex // protects w
+	mu sync.Mutex // protects w and needSep
 	w  io.Writer
 
 	root    string
@@ -101,12 +101,15 @@ func (f *textFormatter) Format(path string, results grep.Results) error {
 	}
 
 	if f.flags&ForiginsSingleLine != 0 {
+		f.mu.Lock()
+		defer f.mu.Unlock()
 		if f.needSep {
 			buf.WriteByte(' ')
 		}
 		buf.WriteString(path)
 		f.needSep = true
-		return f.write(buf)
+		_, err := f.w.Write(buf.Bytes())
+		return err
 	}
 
 	if f.flags&ForiginsOnly != 0 {
