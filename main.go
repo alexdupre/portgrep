@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"io"
 	"os"
 	"runtime"
 	"runtime/debug"
 	"strings"
+	"text/template"
 	"unicode"
 
 	"github.com/alexdupre/portgrep/formatter"
@@ -55,7 +55,7 @@ var (
 	categories        []string
 	ored              bool
 	plainText         bool
-	maxJobs           = runtime.NumCPU()
+	maxJobs           = runtime.GOMAXPROCS(0)
 	originsSingleLine bool
 	contextAfter      int
 	contextBefore     int
