@@ -70,7 +70,7 @@ const (
 )
 
 func showUsage() {
-	err := usageTmpl.Execute(os.Stdout, map[string]interface{}{
+	err := usageTmpl.Execute(os.Stdout, map[string]any{
 		"progname":  progname,
 		"colorMode": colorMode,
 		"colors":    colors,
@@ -86,7 +86,7 @@ func showVersion() {
 	fmt.Printf("%s %s\n", progname, version)
 }
 
-func errExit(format string, v ...interface{}) {
+func errExit(format string, v ...any) {
 	fmt.Fprint(os.Stderr, progname, ": ")
 	fmt.Fprintf(os.Stderr, format, v...)
 	fmt.Fprintln(os.Stderr)

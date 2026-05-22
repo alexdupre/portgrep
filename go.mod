@@ -1,6 +1,6 @@
 module github.com/alexdupre/portgrep
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/dmgk/getopt v0.0.0-20220602135849-0df81d2e6333

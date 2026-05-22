@@ -185,7 +185,7 @@ func (f *textFormatter) write(buf *bytes.Buffer) error {
 }
 
 var bufPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return &bytes.Buffer{}
 	},
 }

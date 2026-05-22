@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sync"
-	"syscall"
 )
 
 // Stop is a special value that can be returned by GrepFunc to indicate that
@@ -85,7 +84,7 @@ type walkResult struct {
 type walkChan chan walkResult
 
 func walk(portsRoot string, categories []string, maxJobs int) (walkChan, error) {
-	dir, err := ioutil.ReadDir(portsRoot)
+	dir, err := os.ReadDir(portsRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -121,16 +120,11 @@ func walk(portsRoot string, categories []string, maxJobs int) (walkChan, error) 
 			}
 
 			sem <- 1
-			wg.Add(1)
+			wg.Go(func() {
+				defer func() { <-sem }()
 
-			go func(cat string) {
-				defer func() {
-					<-sem
-					wg.Done()
-				}()
-
-				catRoot := filepath.Join(portsRoot, cat)
-				dir, err := ioutil.ReadDir(catRoot)
+				catRoot := filepath.Join(portsRoot, name)
+				dir, err := os.ReadDir(catRoot)
 				if err != nil {
 					out <- walkResult{err: err}
 					return
@@ -140,7 +134,7 @@ func walk(portsRoot string, categories []string, maxJobs int) (walkChan, error) 
 						out <- walkResult{path: filepath.Join(catRoot, fi.Name())}
 					}
 				}
-			}(name)
+			})
 		}
 
 		wg.Wait()
@@ -179,17 +173,12 @@ func (walk walkChan) grep(rxs []*Regexp, rxsOr bool, maxJobs int) (grepChan, err
 			}
 
 			sem <- 1
-			wg.Add(1)
+			wg.Go(func() {
+				defer func() { <-sem }()
 
-			go func(portRoot string) {
-				defer func() {
-					<-sem
-					wg.Done()
-				}()
-
-				buf, err := readFile(filepath.Join(portRoot, "Makefile"))
+				buf, err := readFile(filepath.Join(w.path, "Makefile"))
 				if err != nil {
-					if err, ok := err.(*os.PathError); ok && err.Err == syscall.ENOENT {
+					if errors.Is(err, fs.ErrNotExist) {
 						// Makefile dosn't exist at path... odd, but okay
 						return
 					}
@@ -217,9 +206,9 @@ func (walk walkChan) grep(rxs []*Regexp, rxsOr bool, maxJobs int) (grepChan, err
 				}
 
 				if res != nil {
-					out <- grepResult{path: portRoot, results: res}
+					out <- grepResult{path: w.path, results: res}
 				}
-			}(w.path)
+			})
 		}
 
 		wg.Wait()
@@ -250,7 +239,7 @@ func readFile(filename string) (*bytes.Buffer, error) {
 }
 
 var bufPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return new(bytes.Buffer)
 	},
 }
