@@ -63,11 +63,14 @@ func TestBroken(t *testing.T) {
 	matches := []string{
 		"BROKEN=	doesn't build",
 		"BROKEN_i386=	broken",
+		"\tBROKEN=	doesn't build",
 	}
 
 	nomatches := []string{
 		"BROKEN_=	doesn't build",
 		"_BROKEN=	doesn't build",
+		"#BROKEN=	doesn't build",
+		"#\tBROKEN=	doesn't build",
 	}
 
 	testBoolPattern(t, broken, matches, nomatches)
@@ -80,12 +83,16 @@ func TestDepends(t *testing.T) {
 		"BUILD_DEPENDS+=	dash:shells/dash bash:shells/bash",
 		"RUN_DEPENDS=	bash>0:shells/bash dash:shells/dash",
 		"OPT_DEPENDS=	/usr/local/bin/bash:shells/bash",
+		"OPT_BUILD_DEPENDS_OFF=	bash:shells/bash",
+		"RUN_DEPENDS_OFF=	bash:shells/bash",
 	}
 
 	nomatches := []string{
 		"BUILD_DEPENDS=	bash-devel:/shells/bash-devel",
 		"BUILD_DEPENDS=	other-bash:/shells/other-bash",
 		"_DEPENDS=		bash:/shells/bash",
+		"#BUILD_DEPENDS=	bash:shells/bash",
+		"#\tBUILD_DEPENDS=	bash:shells/bash",
 	}
 
 	testStringPattern(t, allDepends, "bash", false, matches, nomatches)
@@ -95,10 +102,13 @@ func TestBuildDepends(t *testing.T) {
 	matches := []string{
 		"BUILD_DEPENDS=	dash:shells/dash bash:shells/bash",
 		"OPT_BUILD_DEPENDS=	bash:shells/bash",
+		"BUILD_DEPENDS_OFF=	bash:shells/bash",
+		"OPT_BUILD_DEPENDS_OFF=	bash:shells/bash",
 	}
 
 	nomatches := []string{
 		"RUN_DEPENDS=	bash-devel:/shells/bash-devel",
+		"#BUILD_DEPENDS=	bash:shells/bash",
 	}
 
 	testStringPattern(t, buildDepends, "bash", false, matches, nomatches)
@@ -110,10 +120,13 @@ func TestLibDepends(t *testing.T) {
 		"LIB_DEPENDS?=	dash:shells/dash bash:shells/bash",
 		"LIB_DEPENDS+=	dash:shells/dash bash:shells/bash",
 		"OPT_LIB_DEPENDS=	bash:shells/bash",
+		"LIB_DEPENDS_OFF=	bash:shells/bash",
+		"OPT_LIB_DEPENDS_OFF=	bash:shells/bash",
 	}
 
 	nomatches := []string{
 		"RUN_DEPENDS=	bash-devel:/shells/bash-devel",
+		"#LIB_DEPENDS=	bash:shells/bash",
 	}
 
 	testStringPattern(t, libDepends, "bash", false, matches, nomatches)
@@ -125,10 +138,13 @@ func TestRunDepends(t *testing.T) {
 		"RUN_DEPENDS?=	dash:shells/dash bash:shells/bash",
 		"RUN_DEPENDS+=	dash:shells/dash bash:shells/bash",
 		"OPT_RUN_DEPENDS=	bash:shells/bash",
+		"RUN_DEPENDS_OFF=	bash:shells/bash",
+		"OPT_RUN_DEPENDS_OFF=	bash:shells/bash",
 	}
 
 	nomatches := []string{
 		"BUILD_DEPENDS=	bash-devel:/shells/bash-devel",
+		"#RUN_DEPENDS=	bash:shells/bash",
 	}
 
 	testStringPattern(t, runDepends, "bash", false, matches, nomatches)
@@ -159,6 +175,8 @@ func TestMaintainer(t *testing.T) {
 		"MAINTAINER=	xports@freebsd.org",
 		"XMAINTAINER=	ports@freebsd.org",
 		"_MAINTAINER=	ports@freebsd.org",
+		"#MAINTAINER=	ports@freebsd.org",
+		"#\tMAINTAINER=	ports@freebsd.org",
 	}
 
 	testStringPattern(t, maintainer, "ports@", false, matches, nomatches)
@@ -176,6 +194,8 @@ func TestPortname(t *testing.T) {
 		"PORTNAME=	pam-modules",
 		"PORTNAME=	-modules",
 		"XPORTNAME=	modules",
+		"#PORTNAME=	modules",
+		"#\tPORTNAME=	modules",
 	}
 
 	testStringPattern(t, portname, "modules", false, matches, nomatches)
@@ -203,6 +223,8 @@ func TestUses(t *testing.T) {
 		"USES=	gmake go xorg",
 		"USES=	gmake go",
 		"VAR_USES=	go",
+		"USES_OFF=	go",
+		"X11_USES_OFF=	go",
 	}
 
 	nomatches := []string{
@@ -213,6 +235,8 @@ func TestUses(t *testing.T) {
 		"USES=	go-test",
 		"USES=	go.test",
 		"XUSES=	go",
+		"#USES=	go",
+		"#\tUSES=	go",
 	}
 
 	testStringPattern(t, uses, "go", false, matches, nomatches)
@@ -224,10 +248,13 @@ func TestPlistRe(t *testing.T) {
 		"PLIST_FILES =bin/bash",
 		"PLIST_FILES =	bin/bash",
 		"OPT_PLIST_FILES =	bin/bash",
+		"PLIST_FILES_OFF=	bin/bash",
+		"OPT_PLIST_FILES_OFF=	bin/bash",
 	}
 
 	nomatches := []string{
 		"PLIST_FILES=	bin/zsh",
+		"#PLIST_FILES=	bin/bash",
 	}
 
 	testStringPattern(t, plist, "bash", false, matches, nomatches)

@@ -176,67 +176,67 @@ var (
 		opt:  'n',
 		pref: "",
 		desc: "search by PORTNAME",
-		pat:  `(?i)(?:.*\n){0,%d}\b(?P<q>PORTNAME)\s*\??=\s*(?P<r>%s).*(\n|\z)(?:.*\n){0,%d}`,
+		pat:  `(?im)(?:.*\n){0,%d}^[ \t]*(?P<q>PORTNAME)\s*\??=\s*(?P<r>%s).*(\n|\z)(?:.*\n){0,%d}`,
 	}
 	maintainer = &stringPattern{
 		opt:  'm',
 		pref: "",
 		desc: "search by MAINTAINER",
-		pat:  `(?i)(?:.*\n){0,%d}\b(?P<q>MAINTAINER)\s*\??=\s*(?P<r>%s).*(\n|\z)(?:.*\n){0,%d}`,
+		pat:  `(?im)(?:.*\n){0,%d}^[ \t]*(?P<q>MAINTAINER)\s*\??=\s*(?P<r>%s).*(\n|\z)(?:.*\n){0,%d}`,
 	}
 	allDepends = &stringPattern{
 		opt:  'd',
 		pref: "",
 		desc: "search by *_DEPENDS",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>(\w+_)?DEPENDS)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:>\.].*(\n|\z))(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>(\w+_)?DEPENDS(_OFF)?)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:>\.].*(\n|\z))(?:.*\n){0,%d}`,
 	}
 	buildDepends = &stringPattern{
 		opt:  'b',
 		pref: "",
 		desc: "search by BUILD_DEPENDS",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>(\w+_)?BUILD_DEPENDS)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:>\.].*(\n|\z))(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>(\w+_)?BUILD_DEPENDS(_OFF)?)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:>\.].*(\n|\z))(?:.*\n){0,%d}`,
 	}
 	libDepends = &stringPattern{
 		opt:  'l',
 		pref: "",
 		desc: "search by LIB_DEPENDS",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>(\w+_)?LIB_DEPENDS)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:\.].*(\n|\z))(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>(\w+_)?LIB_DEPENDS(_OFF)?)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:\.].*(\n|\z))(?:.*\n){0,%d}`,
 	}
 	runDepends = &stringPattern{
 		opt:  'r',
 		pref: "",
 		desc: "search by RUN_DEPENDS",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>(\w+_)?RUN_DEPENDS)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:>\.].*(\n|\z))(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>(\w+_)?RUN_DEPENDS(_OFF)?)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:>\.].*(\n|\z))(?:.*\n){0,%d}`,
 	}
 	testDepends = &stringPattern{
 		opt:  't',
 		pref: "",
 		desc: "search by TEST_DEPENDS",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>(\w+_)?TEST_DEPENDS)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:>\.].*(\n|\z))(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>(\w+_)?TEST_DEPENDS(_OFF)?)\s*(\+|\?)?(=|=.*?[\s/}])(?P<r>%s)((\n|\z)|[\s@:>\.].*(\n|\z))(?:.*\n){0,%d}`,
 	}
 	onlyForArchs = &stringPattern{
 		opt:  'a',
 		pref: "",
 		desc: "search by ONLY_FOR_ARCHS",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>ONLY_FOR_ARCHS)\s*(\+|\?)?(=|=.*?\s)(?P<r>%s)((\n|\z)|\s.*(\n|\z))(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>ONLY_FOR_ARCHS)\s*(\+|\?)?(=|=.*?\s)(?P<r>%s)((\n|\z)|\s.*(\n|\z))(?:.*\n){0,%d}`,
 	}
 	uses = &stringPattern{
 		opt:  'u',
 		pref: "",
 		desc: "search by USES",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>([\w_]+_)?USES)\s*(\+|\?)?(=|=.*?\s)(?P<r>%s)((\n|\z)|[\s:,].*(\n|\z))(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>([\w_]+_)?USES(_OFF)?)\s*(\+|\?)?(=|=.*?\s)(?P<r>%s)((\n|\z)|[\s:,].*(\n|\z))(?:.*\n){0,%d}`,
 	}
 	plist = &stringPattern{
 		opt:  'p',
 		pref: "",
 		desc: "search by PLIST_FILES",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>([\w_]+_)?PLIST_FILES)\s*(\+|\?)?=.*?(?P<r>%s).*(\n|\z)(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>([\w_]+_)?PLIST_FILES(_OFF)?)\s*(\+|\?)?=.*?(?P<r>%s).*(\n|\z)(?:.*\n){0,%d}`,
 	}
 	broken = &boolPattern{
 		opt:  'X',
 		pref: "",
 		desc: "search only ports marked BROKEN",
-		pat:  `(?:.*\n){0,%d}\b(?P<q>BROKEN(_[^=]+)?)\s*\??=(?P<r>.*)(\n|\z)(?:.*\n){0,%d}`,
+		pat:  `(?m)(?:.*\n){0,%d}^[ \t]*(?P<q>BROKEN(_[^=]+)?)\s*\??=(?P<r>.*)(\n|\z)(?:.*\n){0,%d}`,
 	}
 )
 
