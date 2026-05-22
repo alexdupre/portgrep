@@ -130,7 +130,6 @@ func (f *textFormatter) Format(path string, results grep.Results) error {
 
 		for i, m := range results {
 			formatBuf := getBuf()
-			defer putBuf(formatBuf)
 
 			if i > 0 {
 				if f.flags&Fcolor != 0 {
@@ -172,6 +171,8 @@ func (f *textFormatter) Format(path string, results grep.Results) error {
 			} else {
 				buf.Write(formatBuf.Bytes())
 			}
+
+			putBuf(formatBuf)
 		}
 
 		return f.write(buf)
