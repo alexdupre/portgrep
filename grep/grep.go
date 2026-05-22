@@ -89,7 +89,7 @@ func walk(portsRoot string, categories []string, maxJobs int) (walkChan, error) 
 		return nil, err
 	}
 
-	out := make(walkChan)
+	out := make(walkChan, maxJobs)
 
 	go func() {
 		defer close(out)
@@ -152,7 +152,7 @@ type grepResult struct {
 type grepChan chan grepResult
 
 func (walk walkChan) grep(rxs []*Regexp, rxsOr bool, maxJobs int) (grepChan, error) {
-	out := make(grepChan)
+	out := make(grepChan, maxJobs)
 
 	go func() {
 		defer close(out)
@@ -187,7 +187,14 @@ func (walk walkChan) grep(rxs []*Regexp, rxsOr bool, maxJobs int) (grepChan, err
 				}
 				defer bufPut(buf)
 
-				b := bytes.ReplaceAll(buf.Bytes(), []byte{'\\', '\n'}, []byte{0, 0})
+				// inline replace of newlines ("\\\n") with "\x00\x00"
+				b := buf.Bytes()
+				for i := 0; i < len(b)-1; i++ {
+					if b[i] == '\\' && b[i+1] == '\n' {
+						b[i], b[i+1] = 0, 0
+						i++
+					}
+				}
 
 				var res Results
 				for _, r := range rxs {
