@@ -10,9 +10,9 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/alexdupre/portgrep/formatter"
+	"github.com/alexdupre/portgrep/grep"
 	"github.com/dmgk/getopt"
-	"github.com/dmgk/portgrep/formatter"
-	"github.com/dmgk/portgrep/grep"
 	"github.com/mattn/go-isatty"
 )
 

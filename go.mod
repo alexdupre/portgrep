@@ -1,4 +1,4 @@
-module github.com/dmgk/portgrep
+module github.com/alexdupre/portgrep
 
 go 1.19
 

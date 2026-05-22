@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/dmgk/portgrep/grep"
+	"github.com/alexdupre/portgrep/grep"
 )
 
 const (
