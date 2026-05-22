@@ -1,12 +1,15 @@
 package main
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"os"
 	"runtime"
 	"runtime/debug"
+	"slices"
 	"strings"
+	"sync"
 	"text/template"
 	"unicode"
 
@@ -60,8 +63,14 @@ var (
 	contextAfter      int
 	contextBefore     int
 	originsOnly       bool
+	sorted            bool
 	noIndent          bool
 )
+
+type pendingResult struct {
+	path    string
+	results grep.Results
+}
 
 const (
 	colorModeAuto   = "auto"
@@ -177,7 +186,7 @@ func main() {
 		case 'o':
 			originsOnly = true
 		case 's':
-			maxJobs = 1
+			sorted = true
 		case 'T':
 			noIndent = true
 		default:
@@ -212,14 +221,37 @@ func main() {
 	}
 
 	f := initFormatter()
+
+	var (
+		pendingMu sync.Mutex
+		pending   []pendingResult
+	)
+
 	gfn := func(path string, results grep.Results, err error) error {
 		if err != nil {
 			return err
+		}
+		if sorted {
+			pendingMu.Lock()
+			pending = append(pending, pendingResult{path, results})
+			pendingMu.Unlock()
+			return nil
 		}
 		return f.Format(path, results)
 	}
 	if err := grep.Grep(portsRoot, categories, rxs, ored, gfn, maxJobs); err != nil {
 		errExit("%s", err)
+	}
+
+	if sorted {
+		slices.SortFunc(pending, func(a, b pendingResult) int {
+			return cmp.Compare(a.path, b.path)
+		})
+		for _, p := range pending {
+			if err := f.Format(p.path, p.results); err != nil {
+				errExit("%s", err)
+			}
+		}
 	}
 }
 
