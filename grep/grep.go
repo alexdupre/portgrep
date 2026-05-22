@@ -179,7 +179,7 @@ func (walk walkChan) grep(rxs []*Regexp, rxsOr bool, maxJobs int) (grepChan, err
 				buf, err := readFile(filepath.Join(w.path, "Makefile"))
 				if err != nil {
 					if errors.Is(err, fs.ErrNotExist) {
-						// Makefile dosn't exist at path... odd, but okay
+						// Makefile doesn't exist at path... odd, but okay
 						return
 					}
 					out <- grepResult{err: err}
