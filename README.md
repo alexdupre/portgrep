@@ -16,7 +16,7 @@ usage: portgrep [options] [query ...]
 General options:
   -h          show help and exit
   -V          show version and exit
-  -R path     ports tree root (default: )
+  -R path     ports tree root (default: autodetect)
   -M mode     colorized output mode: [auto|never|always] (default: auto)
   -G colors   set colors (default: "BCDA")
               the order is query,match,path,separator; see ls(1) for color codes

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"slices"
@@ -109,6 +110,8 @@ func main() {
 	// disable GC, this is short-running utility and performance is more
 	// important than memory consumption
 	debug.SetGCPercent(-1)
+
+	portsRoot = findPortsRoot(portsRoot)
 
 	if v, ok := os.LookupEnv("PORTSDIR"); ok && v != "" {
 		portsRoot = v
@@ -296,4 +299,24 @@ func splitOptions(s string) []string {
 	return strings.FieldsFunc(s, func(r rune) bool {
 		return unicode.IsSpace(r) || r == ','
 	})
+}
+
+// walks up from cwd looking for a Mk/bsd.port.mk file and returns the
+// directory containing it.  If nothing is found, use the fallback.
+func findPortsRoot(fallback string) string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fallback
+	}
+	for dir := cwd; ; {
+		if _, err := os.Stat(filepath.Join(dir, "Mk", "bsd.port.mk")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return fallback
 }
