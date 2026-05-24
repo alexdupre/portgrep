@@ -34,6 +34,7 @@ Search options:
   -c name,... limit search to only these categories
   -O          multiple searches are OR-ed (default: AND-ed)
   -F          interpret query as a plain text, not regular expression
+  -g          show every match in a Makefile (default: first only)
   -j jobs     number of parallel jobs (default: {{.maxJobs}})
 
 Formatting options:
@@ -58,6 +59,7 @@ var (
 	categories        []string
 	ored              bool
 	plainText         bool
+	greedy            bool
 	maxJobs           = runtime.GOMAXPROCS(0)
 	originsSingleLine bool
 	contextAfter      int
@@ -115,7 +117,7 @@ func main() {
 		colors = v
 	}
 
-	opts, err := getopt.NewArgv("hVR:M:G:c:OFj:1A:B:C:osT"+grep.Patterns.OptionString(), argsWithDefaults(os.Args, "PORTGREP_OPTS"))
+	opts, err := getopt.NewArgv("hVR:M:G:c:OFgj:1A:B:C:osT"+grep.Patterns.OptionString(), argsWithDefaults(os.Args, "PORTGREP_OPTS"))
 	if err != nil {
 		panic(fmt.Sprintf("error creating options parser: %s", err))
 	}
@@ -153,6 +155,8 @@ func main() {
 			ored = true
 		case 'F':
 			plainText = true
+		case 'g':
+			greedy = true
 		case 'j':
 			v, err := opt.Int()
 			if err != nil {
@@ -239,7 +243,7 @@ func main() {
 		}
 		return f.Format(path, results)
 	}
-	if err := grep.Grep(portsRoot, categories, rxs, ored, gfn, maxJobs); err != nil {
+	if err := grep.Grep(portsRoot, categories, rxs, ored, greedy, gfn, maxJobs); err != nil {
 		errExit("%s", err)
 	}
 

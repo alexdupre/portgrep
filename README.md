@@ -25,6 +25,7 @@ Search options:
   -c name,... limit search to only these categories
   -O          multiple searches are OR-ed (default: AND-ed)
   -F          interpret query as a plain text, not regular expression
+  -g          show every match in a Makefile (default: first only)
   -j jobs     number of parallel jobs (default: 8)
 
 Formatting options:

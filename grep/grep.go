@@ -40,14 +40,16 @@ type GrepFunc func(path string, res Results, err error) error
 // levels down (category/port).  If cats slice is not empty, Grep descends only
 // to categories listed in cats.  By default, multiple regular expressions in
 // rxs are AND-ed together, this can be changed by setting rxsOred to true.
-// The search will be run by using up to jobs goroutines, the usual practice is
-// to set this to runtime.NumCPU() for the best results.
-func Grep(portsRoot string, categories []string, rxs []*Regexp, rxsOred bool, gfn GrepFunc, maxJobs int) error {
+// By default, only the first match per Makefile is returned; set rxsAll to
+// emit every non-overlapping match.  The search will be run by using up to
+// jobs goroutines, the usual practice is to set this to runtime.GOMAXPROCS(0)
+// for the best results.
+func Grep(portsRoot string, categories []string, rxs []*Regexp, rxsOred, rxsAll bool, gfn GrepFunc, maxJobs int) error {
 	walkCh, err := walk(portsRoot, categories, maxJobs)
 	if err != nil {
 		return err
 	}
-	grepCh, err := walkCh.grep(rxs, rxsOred, maxJobs)
+	grepCh, err := walkCh.grep(rxs, rxsOred, rxsAll, maxJobs)
 	if err != nil {
 		return err
 	}
@@ -151,7 +153,7 @@ type grepResult struct {
 
 type grepChan chan grepResult
 
-func (walk walkChan) grep(rxs []*Regexp, rxsOr bool, maxJobs int) (grepChan, error) {
+func (walk walkChan) grep(rxs []*Regexp, rxsOr, rxsAll bool, maxJobs int) (grepChan, error) {
 	out := make(grepChan, maxJobs)
 
 	go func() {
@@ -198,15 +200,24 @@ func (walk walkChan) grep(rxs []*Regexp, rxsOr bool, maxJobs int) (grepChan, err
 
 				var res Results
 				for _, r := range rxs {
-					m, err := r.Match(b)
+					var ms Results
+					if rxsAll {
+						ms, err = r.MatchAll(b)
+					} else {
+						var m *Result
+						m, err = r.Match(b)
+						if m != nil {
+							ms = Results{m}
+						}
+					}
 					if err != nil {
 						out <- grepResult{err: err}
 						return
 					}
-					if !rxsOr && m == nil {
+					if !rxsOr && len(ms) == 0 {
 						return // results are ANDed and the current rx doesn't match
 					}
-					if m != nil {
+					for _, m := range ms {
 						m.Text = bytes.ReplaceAll(m.Text, []byte{0, 0}, []byte{'\\', '\n'})
 						res = append(res, m)
 					}

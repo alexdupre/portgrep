@@ -17,6 +17,29 @@ func (r *Regexp) Match(text []byte) (*Result, error) {
 	if smi == nil {
 		return nil, nil
 	}
+	return r.buildResult(text, smi)
+}
+
+// MatchAll returns every non-overlapping match in text. RE2 advances past each
+// match's full extent, so context-after of one match never overlaps with
+// context-before of the next.
+func (r *Regexp) MatchAll(text []byte) (Results, error) {
+	smis := r.re.FindAllSubmatchIndex(text, -1)
+	if smis == nil {
+		return nil, nil
+	}
+	results := make(Results, 0, len(smis))
+	for _, smi := range smis {
+		res, err := r.buildResult(text, smi)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, res)
+	}
+	return results, nil
+}
+
+func (r *Regexp) buildResult(text []byte, smi []int) (*Result, error) {
 	if len(smi) < 2*(r.rsi+1) {
 		return nil, fmt.Errorf("unexpected number of subexpressions %d in %v", len(smi), r)
 	}
